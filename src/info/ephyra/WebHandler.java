@@ -51,15 +51,17 @@ public class WebHandler implements HttpHandler {
                     // Send RESPONSE Headers
                     he.sendResponseHeaders(HttpURLConnection.HTTP_OK, contentLength);
 
-                    JsonArrayBuilder jab = Json.createArrayBuilder();
+                    JsonObjectBuilder job = Json.createObjectBuilder();
                     for (int r=0; r<results.length; r++) {
+                        String percent = String.format("%2.2f", results[r].getScore());
                         //JsonObject result = Json.createObjectBuilder()
-                        //        .add(, results[r].getScore()).build();
-                        jab.add(results[r].getAnswer());
+                        //        .add(results[r].getAnswer(), results[r].getScore()).build();
+                        //jab.add(result);
+                        job.add(results[r].getAnswer(), percent);
                     }
 
                     JsonObject answerResponse = Json.createObjectBuilder()
-                            .add("SortedAnswers", jab).build();
+                            .add("SortedAnswers", job).build();
 
                     OutputStream os = new ByteArrayOutputStream();
 

@@ -199,25 +199,25 @@ public class AnswerSelection {
 
         //ValueComparator baseValueComparator = new ValueComparator(rankedAnswers, isInverse);
         //Tree = new TreeMap<String, Integer>(baseValueComparator);
-        Map<String, Integer> sortedAnswers = AnswerSelection.sortMapByValues(rankedAnswers, isInverse);
+        //Map<String, Integer> sortedAnswers = AnswerSelection.sortMapByValues(rankedAnswers, isInverse);
         resultsList.clear();
 
         System.out.println("Inverted? "+isInverse);
 
-        System.out.println("Unsorted: "+rankedAnswers.toString());
-        System.out.println("Sorted: "+sortedAnswers.toString());
+        //System.out.println("Unsorted: "+rankedAnswers.toString());
+        //System.out.println("Sorted: "+sortedAnswers.toString());
 
         if (!foundAnyAnswer) {
 			System.out.println("Answer selection: No hack answer found :(");
 		} else {
-            for (Map.Entry entry : sortedAnswers.entrySet()) {
+            for (Map.Entry entry : rankedAnswers.entrySet()) {
                 double percent = ((Integer)entry.getValue())/((double)resultCount);
                 if (isInverse) {
                     percent = 1 - percent;
                 }
-                String answer = entry.getKey() + " (" + String.format("%2.2f", percent*100) + "%)";
-                Result r = new Result(answer);
-                r.setScore((float)percent);
+                //String answer = entry.getKey() + " (" + String.format("%2.2f", percent*100) + "%)";
+                Result r = new Result((String)entry.getKey());
+                r.setScore((float)(percent*100));
                 resultsList.add(r);
             }
 			/*if (isInverse) {
