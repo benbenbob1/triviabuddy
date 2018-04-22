@@ -50,6 +50,12 @@ public class QueryGeneration {
 			Query[] queries = queryGenerator.generateQueries(aq);
 			for (Query query : queries) results.add(query);
 		}
+
+		if (results.size() == 0) {
+			Query q = new Query(aq.getQuestion(), aq, 1);
+			results.add(q);
+			System.out.println("-- No generated queries. Added back original query!");
+		}
 		
 		// print and log query strings
 		Query[] queries = results.toArray(new Query[results.size()]);

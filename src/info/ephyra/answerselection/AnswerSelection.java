@@ -4,7 +4,9 @@ import info.ephyra.answerselection.filters.Filter;
 import info.ephyra.io.MsgPrinter;
 import info.ephyra.search.Result;
 
-import java.util.ArrayList;
+import java.util.*;
+
+import me.xdrop.fuzzywuzzy.FuzzySearch;
 
 /**
  * <p>The <code>AnswerSelection</code> component applies <code>Filters</code> to
@@ -16,6 +18,41 @@ import java.util.ArrayList;
  * @version 2006-06-28
  */
 public class AnswerSelection {
+
+    public static <K, V extends Comparable< ? super V>> Map<K, V> sortMapByValues(final Map <K, V> mapToSort, final boolean inverted)
+    {
+        List<Map.Entry<K, V>> entries =
+                new ArrayList<Map.Entry<K, V>>(mapToSort.size());
+
+        entries.addAll(mapToSort.entrySet());
+
+        Collections.sort(entries, new Comparator<Map.Entry<K, V>>()
+        {
+            @Override
+            public int compare(
+                    final Map.Entry<K, V> entry1,
+                    final Map.Entry<K, V> entry2)
+            {
+                int compare = entry1.getValue().compareTo(entry2.getValue());
+                if (!inverted) {
+                    compare = 0 - compare;
+                }
+                return compare;
+            }
+        });
+
+        Map<K, V> sortedMap = new LinkedHashMap<K, V>();
+
+        for (Map.Entry<K, V> entry : entries)
+        {
+            sortedMap.put(entry.getKey(), entry.getValue());
+
+        }
+
+        return sortedMap;
+
+    }
+
 	/**
 	 * The <code>Filters</code> that are applied to the <code>Results</code>.
 	 * Filters are applied in the order in which they appear in this list.
@@ -84,53 +121,116 @@ public class AnswerSelection {
 	 * @return up to <code>maxResults</code> results
 	 */
 	public static Result[] getResultsWithAnswerMatching(Result[] results, String[] answers, int maxResults,
-		float minScore) {
+		float minScore, boolean isInverse) {
+
+		int[] answerCounts = new int[answers.length];
+		int resultCount = results.length;
+
+		boolean foundAnyAnswer = false;
+
+        Map<String, Integer> rankedAnswers = new HashMap<String, Integer>();
+
+        for (String answer : answers) {
+            rankedAnswers.put(answer, 0);
+        }
+
+		for (Result result : results) {
+			for (String answer : answers) {
+				//Fuzzy search for answer in result
+				/*if (result.getAnswer().contains(answer)) {
+					answerCounts[a] += 1;
+				}*/
+				int ratio = FuzzySearch.tokenSetRatio(answer, result.getAnswer());
+				//System.out.println("Ratio of "+answer+" in "+result.getAnswer()+" is >>>>>> "+ratio);
+				if (ratio > 50) {
+				    int curVal = rankedAnswers.get(answer);
+					rankedAnswers.put(answer, curVal+1);
+					foundAnyAnswer = true;
+				}
+			}
+		}
+
 		// apply filters
-		/*for (Filter filter : filters) {
+		for (Filter filter : filters) {
 			MsgPrinter.printFilterStarted(filter, results.length);
 			results = filter.apply(results);
 			MsgPrinter.printFilterFinished(filter, results.length);
-		}*/
-
-
-		int[] answerCounts = new int[answers.length];
+		}
 
 		// get up to maxResults results with a score of at least minScore
 		ArrayList<Result> resultsList = new ArrayList<Result>();
 		for (Result result : results) {
-
-			//System.out.println("A result: "+result.getAnswer());
-
-			for (int a = 0; a<answers.length; a++) {
-				String answer = answers[a];
-				if (result.getAnswer().contains(answer)) {
-					answerCounts[a] += 1;
-				}
-			}
-
-
-			/*if (maxResults == 0) break;
+			if (maxResults == 0) break;
 
 			if (result.getScore() >= minScore) {
 				resultsList.add(result);
 				maxResults--;
-			}*/
+			}
 		}
 
-		int maxCount = -1;
-		int bestAnswer = 0;
+		/*int maxCount = 0;
+		int minCount = 100;
+		int bestAnswer = 0, worstAnswer = 0;
 		for (int a = 0; a<answers.length; a++) {
 			int count = answerCounts[a];
 			if (count > maxCount) {
 				maxCount = count;
 				bestAnswer = a;
 			}
-		}
 
-		if (maxCount == -1) {
-			System.out.println("No hack answer found :(");
+			if (count < minCount) {
+				minCount = count;
+				worstAnswer = a;
+			}
+		}*/
+
+		if (resultsList.size() > 0) {
+		    for (Result result : resultsList) {
+                for (String answer : answers) {
+                    int ratioToActualAnswer = FuzzySearch.tokenSetRatio(answer, result.getAnswer());
+                    if (ratioToActualAnswer >= 75) {
+                        foundAnyAnswer = true;
+                        System.out.println("Found actual answer!!");
+                        rankedAnswers.put(answer, rankedAnswers.get(answer)+(resultCount/2));
+                    }
+                }
+            }
+        }
+
+        //ValueComparator baseValueComparator = new ValueComparator(rankedAnswers, isInverse);
+        //Tree = new TreeMap<String, Integer>(baseValueComparator);
+        Map<String, Integer> sortedAnswers = AnswerSelection.sortMapByValues(rankedAnswers, isInverse);
+        resultsList.clear();
+
+        System.out.println("Inverted? "+isInverse);
+
+        System.out.println("Unsorted: "+rankedAnswers.toString());
+        System.out.println("Sorted: "+sortedAnswers.toString());
+
+        if (!foundAnyAnswer) {
+			System.out.println("Answer selection: No hack answer found :(");
 		} else {
-			System.out.println("Hack answer found! "+answers[bestAnswer]);
+            for (Map.Entry entry : sortedAnswers.entrySet()) {
+                double percent = ((Integer)entry.getValue())/((double)resultCount);
+                if (isInverse) {
+                    percent = 1 - percent;
+                }
+                String answer = entry.getKey() + " (" + (percent*100) + "%)";
+                Result r = new Result(answer);
+                r.setScore((float)percent);
+                resultsList.add(r);
+            }
+			/*if (isInverse) {
+				System.out.println("Answer was inverted");
+				int temp = bestAnswer;
+				bestAnswer = worstAnswer;
+				worstAnswer = temp;
+			}
+
+			System.out.println("Answer selection: Hack answer found! "+answers[bestAnswer]+" ("+maxCount+"/"+resultCount+")");
+			System.out.println("Answer selection: Worst answer: "+answers[worstAnswer]+" ("+minCount+"/"+resultCount+")");*/
+
+
 		}
 
 		return resultsList.toArray(new Result[resultsList.size()]);

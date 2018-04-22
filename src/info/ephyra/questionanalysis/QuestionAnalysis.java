@@ -20,6 +20,7 @@ import java.util.regex.Pattern;
 
 import edu.cmu.lti.javelin.util.Language;
 import edu.cmu.lti.util.Pair;
+import me.xdrop.fuzzywuzzy.FuzzySearch;
 
 /**
  * Analyzes a question string:
@@ -243,13 +244,62 @@ public class QuestionAnalysis {
 				: PredicateExtractor.getPredicates(qn, verbMod, ats, terms);
 		MsgPrinter.printPredicates(ps);
 		Logger.logPredicates(ps);
+
+
 		
 		// expand terms
 		TermExpander.expandTerms(terms, ps,
 				ontologies.toArray(new Ontology[ontologies.size()]));
-		
-		return new AnalyzedQuestion(question, qn, stemmed, verbMod, kws, nes,
+
+		ArrayList<String> exceptStrings = new ArrayList<String>();
+		/*exceptStrings.add("not");
+		exceptStrings.add("except");
+		exceptStrings.add("isn't");
+		exceptStrings.add("aren't");
+		exceptStrings.add("wasn't");
+		exceptStrings.add("weren't");
+		exceptStrings.add("haven't");
+		exceptStrings.add("hasn't");
+		exceptStrings.add("hadn't");
+		exceptStrings.add("wont");
+		exceptStrings.add("can't");
+		exceptStrings.add("cannot");
+		exceptStrings.add("wouldn't");
+		exceptStrings.add("don't");
+		exceptStrings.add("doesn't");
+		exceptStrings.add("didn't");
+		exceptStrings.add("couldn't");
+		exceptStrings.add("mightn't");
+		exceptStrings.add("mustn't");*/
+		exceptStrings.add("NOT");
+
+		boolean isNegated = false;
+		for (String except: exceptStrings) {
+			/*int ratio = FuzzySearch.tokenSetRatio(except, question);
+			if (ratio >= 80) {
+				//Found except word
+				isNegated = true;
+				if (question.contains(except)) {
+					question = question.replaceFirst(except, "");
+				}
+				break;
+			}*/
+			if (question.contains(except)) {
+				isNegated = true;
+				question.replaceFirst(except, "");
+				break;
+			}
+		}
+
+		AnalyzedQuestion aq = new AnalyzedQuestion(question, qn, stemmed, verbMod, kws, nes,
 				terms, focus, ats, qis, ps);
+
+		if (isNegated) {
+			System.out.println("Detected EXCEPTION word. Acting accordingly...");
+			aq.isNegated = true;
+		}
+
+		return aq;
 	}
     
     public static void main (String[] args) {

@@ -41,6 +41,8 @@ public class AnalyzedQuestion implements Serializable {
 	private Predicate[] ps = new Predicate[0];
 	/** Indicates that this is a factoid question. */
 	private boolean isFactoid = true;
+
+	public boolean isNegated = false;
 	
 	public AnalyzedQuestion(String question) {
 		setQuestion(question);

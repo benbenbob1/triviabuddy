@@ -369,13 +369,17 @@ public class OpenEphyra
         MsgPrinter.printGeneratingQueries();
         Query[] queries = QueryGeneration.getQueries(aq);
 
+        //Query[] toSearch = new Query[1];
+        //toSearch[0] = new Query(aq.getQuestion());
+
         // search
         MsgPrinter.printSearching();
+        //Result[] results = Search.doSearch(toSearch);
         Result[] results = Search.doSearch(queries);
 
         // answer selection
         MsgPrinter.printSelectingAnswers();
-        results = AnswerSelection.getResultsWithAnswerMatching(results, answers, maxAnswers, absThresh);
+        results = AnswerSelection.getResultsWithAnswerMatching(results, answers, maxAnswers, absThresh, aq.isNegated);
 
         return results;
     }
@@ -428,7 +432,7 @@ public class OpenEphyra
             Result[] results = new Result[0];
 
             Logger.logFactoidStart(question);
-            results = askFactoidWithAnswers(question, answers, FACTOID_MAX_ANSWERS,
+            results = askFactoidWithAnswers(question, hasAnswers?answers:null, FACTOID_MAX_ANSWERS,
                     FACTOID_ABS_THRESH);
             Logger.logResults(results);
             Logger.logFactoidEnd();

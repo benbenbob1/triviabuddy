@@ -3,7 +3,8 @@
               Any modifications will be overwritten.
               To include a user specific buildfile here, simply create one in the same
               directory with the processing instruction <?eclipse.ant.import?>
-              as the first entry and export the buildfile again. --><project basedir="." default="build" name="openephyra">
+              as the first entry and export the buildfile again. -->
+<project basedir="." default="build" name="openephyra">
     <property environment="env"/>
     <property name="JRE_LIB" value="../../../../../usr/local/java/jdk1.7.0_51/jre/lib/rt.jar"/>
     <property name="ECLIPSE_HOME" value="../../eclipse"/>
@@ -15,6 +16,7 @@
         <pathelement location="bin"/>
         <pathelement location="${JRE_LIB}"/>
         <path refid="Persisted container [/home/scottj/dev/projects/openephyra/bin for project [openephyra]].libraryclasspath"/>
+        <pathelement location="lib/fuzzywuzzy.jar"/>
         <pathelement location="lib/ml/maxent.jar"/>
         <pathelement location="lib/ml/minorthird.jar"/>
         <pathelement location="lib/nlp/jwnl.jar"/>
