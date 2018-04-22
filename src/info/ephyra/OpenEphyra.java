@@ -1,5 +1,7 @@
 package info.ephyra;
 
+import com.sun.net.httpserver.HttpContext;
+import com.sun.net.httpserver.HttpServer;
 import info.ephyra.answerselection.AnswerSelection;
 import info.ephyra.answerselection.filters.AnswerPatternFilter;
 import info.ephyra.answerselection.filters.AnswerTypeFilter;
@@ -43,7 +45,12 @@ import info.ephyra.search.Result;
 import info.ephyra.search.Search;
 import info.ephyra.search.searchers.BingAzureKM;
 
+import java.io.OutputStream;
+import java.net.InetSocketAddress;
 import java.util.ArrayList;
+
+import java.io.IOException;
+import java.net.URI;
 
 /**
  * <code>OpenEphyra</code> is an open framework for question answering (QA).
@@ -75,6 +82,11 @@ public class OpenEphyra
     /** The directory of Ephyra, required when Ephyra is used as an API. */
     protected String dir;
 
+    //Web stuff
+    public static final String BASE_URI = "http://localhost:8000/";
+
+    private static OpenEphyra oeInstance = null;
+
     /**
      * Entry point of Ephyra. Initializes the engine and starts the command line
      * interface.
@@ -85,7 +97,25 @@ public class OpenEphyra
     public static void main(String[] args)
     {
         // initialize Ephyra and start command line interface
-        (new OpenEphyra()).commandLine();
+        /*(new OpenEphyra()).commandLine();*/
+
+        try {
+            GetSingleton();
+            HttpServer server = HttpServer.create(new InetSocketAddress(8000), 0);
+            HttpContext context = server.createContext("/query", new WebHandler());
+            server.start();
+        }
+        catch (Exception e) {
+
+        }
+    }
+
+    public static OpenEphyra GetSingleton() {
+        if (oeInstance == null) {
+            oeInstance = new OpenEphyra();
+        }
+
+        return oeInstance;
     }
 
     /**
@@ -429,7 +459,7 @@ public class OpenEphyra
             }
 
             // ask question
-            Result[] results = new Result[0];
+            Result[] results;
 
             Logger.logFactoidStart(question);
             results = askFactoidWithAnswers(question, hasAnswers?answers:null, FACTOID_MAX_ANSWERS,

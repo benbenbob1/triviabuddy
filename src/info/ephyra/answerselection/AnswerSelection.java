@@ -215,7 +215,7 @@ public class AnswerSelection {
                 if (isInverse) {
                     percent = 1 - percent;
                 }
-                String answer = entry.getKey() + " (" + (percent*100) + "%)";
+                String answer = entry.getKey() + " (" + String.format("%2.2f", percent*100) + "%)";
                 Result r = new Result(answer);
                 r.setScore((float)percent);
                 resultsList.add(r);
