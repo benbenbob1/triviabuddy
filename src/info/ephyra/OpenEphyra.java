@@ -130,8 +130,10 @@ public class OpenEphyra
         Logger.enableLogging(true);
         
         // enable output of status and error messages
-        MsgPrinter.enableStatusMsgs(true);
-        MsgPrinter.enableErrorMsgs(true);
+        //MsgPrinter.enableStatusMsgs(true);
+        //MsgPrinter.enableErrorMsgs(true);
+        MsgPrinter.enableStatusMsgs(false);
+        MsgPrinter.enableErrorMsgs(false);
         MsgPrinter.printInitializing();
 
         // create tokenizer
@@ -414,6 +416,7 @@ public class OpenEphyra
      */
     public void commandLine()
     {
+        System.out.println("Ready for input.");
         while (true)
         {
             /*
