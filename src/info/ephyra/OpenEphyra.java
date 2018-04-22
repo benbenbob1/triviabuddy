@@ -44,6 +44,10 @@ import info.ephyra.search.Search;
 import info.ephyra.search.searchers.BingAzureKM;
 
 import java.util.ArrayList;
+import java.io.File;
+import java.io.FileReader;
+import java.io.BufferedReader;
+import java.io.IOException;
 
 /**
  * <code>OpenEphyra</code> is an open framework for question answering (QA).
@@ -412,6 +416,7 @@ public class OpenEphyra
     {
         while (true)
         {
+            /*
             // query user for question, quit if user types in "exit"
             MsgPrinter.printQuestionPrompt();
             String question = readLine().trim();
@@ -427,6 +432,37 @@ public class OpenEphyra
                 //Got answers
                 hasAnswers = true;
             }
+            */
+
+            boolean hasAnswers = false;
+            String question = "";
+            String answers[] = {};
+            while (!hasAnswers) {
+                try {
+                    File questionFile = new File("/home/mark/Documents/triviabuddy/scripts/question_data.json");
+                    if (questionFile.exists() && questionFile.isFile()) {
+                        hasAnswers = true;
+                        FileReader fileReader = new FileReader(questionFile);
+                        BufferedReader bufferedReader = new BufferedReader(fileReader);
+                        question = bufferedReader.readLine();
+                        question = question.trim();
+                        answers = bufferedReader.readLine().trim().split(":");
+                        fileReader.close();
+                        questionFile.delete();
+                    }
+                    else {
+                        Thread.sleep(200);
+                    }
+                }
+                catch (IOException ioe) {
+                    hasAnswers = false;
+                }
+                catch (InterruptedException ie) {
+                    hasAnswers = false;
+                }
+            }
+
+
 
             // ask question
             Result[] results = new Result[0];
