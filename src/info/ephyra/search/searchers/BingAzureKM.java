@@ -38,7 +38,7 @@ import org.apache.commons.codec.binary.Base64;
 public class BingAzureKM extends KnowledgeMiner
 {
     // Bing account ID (replace this with your registered Azure account ID):
-    private static final String BING_ACCESS_KEY = "eb1bc6210e174db2a053c165a7dd0117";
+    private static final String BING_ACCESS_KEY = "71c1c4c89188431ca7a9b357ce7cd1e9";
     
     // Bing base URL for web queries:
     private static final String BING_API_URL = "https://api.cognitive.microsoft.com/bing/v7.0/search?q=";
