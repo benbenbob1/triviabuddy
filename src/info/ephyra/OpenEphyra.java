@@ -440,13 +440,14 @@ public class OpenEphyra
      */
     public void commandLine()
     {
+        System.out.println("Ready.");
         while (true)
         {
             // query user for question, quit if user types in "exit"
             MsgPrinter.printQuestionPrompt();
             String question = readLine().trim();
-            if (question.equalsIgnoreCase("exit"))
-                System.exit(0);
+            //if (question.equalsIgnoreCase("exit"))
+            //    System.exit(0);
 
             boolean hasAnswers = false;
 
